@@ -1,0 +1,454 @@
+/* ==========================================================================
+   NairobiKonnekt — project section
+   Visual language: a Nairobi transit map. The system architecture is drawn
+   as a metro line with stations; small details (route-code chips, an LED
+   destination-board flicker for the tagline) borrow from matatu signage.
+   ========================================================================== */
+
+.nk-section {
+  --nk-bg: #0a0e1a;
+  --nk-panel: #10162a;
+  --nk-panel-2: #0d1224;
+  --nk-line: #232c47;
+  --nk-text: #e7eaf3;
+  --nk-muted: #8a93ad;
+  --nk-blue: #4f8ef7;
+  --nk-amber: #f2b134;
+  --nk-green: #3fbf8f;
+  --nk-violet: #9d7bff;
+
+  --nk-display: "Fraunces", ui-serif, Georgia, serif;
+  --nk-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --nk-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  position: relative;
+  overflow: hidden;
+  background: var(--nk-bg);
+  color: var(--nk-text);
+  font-family: var(--nk-body);
+  padding: 6rem 1.5rem 7rem;
+  isolation: isolate;
+}
+
+.nk-section * {
+  box-sizing: border-box;
+}
+
+.nk-container {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* ---------- ambient background ---------- */
+
+.nk-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nk-bg-path {
+  fill: none;
+  stroke: var(--nk-line);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 11;
+  opacity: 0.5;
+  animation: nk-dash-drift 46s linear infinite;
+}
+.nk-bg-path--b {
+  stroke: var(--nk-blue);
+  opacity: 0.35;
+  animation-duration: 60s;
+  animation-direction: reverse;
+}
+.nk-bg-path--c {
+  stroke: var(--nk-amber);
+  opacity: 0.22;
+  animation-duration: 74s;
+}
+
+.nk-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(60% 50% at 20% 0%, rgba(79, 142, 247, 0.14), transparent 60%),
+    radial-gradient(50% 40% at 100% 100%, rgba(242, 177, 52, 0.08), transparent 60%);
+  pointer-events: none;
+}
+
+@keyframes nk-dash-drift {
+  to {
+    stroke-dashoffset: -320;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.nk-eyebrow {
+  display: inline-block;
+  font-family: var(--nk-mono);
+  font-size: 0.8125rem;
+  color: var(--nk-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.nk-hero {
+  margin-bottom: 4.5rem;
+}
+
+.nk-title {
+  font-family: var(--nk-display);
+  font-weight: 500;
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.9rem;
+}
+
+.nk-title-underline {
+  width: min(320px, 60%);
+  height: 12px;
+  display: block;
+  margin-bottom: 1.25rem;
+  overflow: visible;
+}
+
+.nk-board {
+  font-family: var(--nk-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--nk-amber);
+  text-shadow: 0 0 8px rgba(242, 177, 52, 0.45);
+  margin: 0;
+}
+
+/* ---------- panel ---------- */
+
+.nk-panel {
+  position: relative;
+  background: linear-gradient(180deg, var(--nk-panel), var(--nk-panel-2));
+  border: 1px solid var(--nk-line);
+  border-radius: 20px;
+  padding: clamp(1.75rem, 4vw, 3.25rem);
+}
+
+.nk-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--nk-mono);
+  font-size: 0.75rem;
+  color: var(--nk-green);
+  border: 1px solid rgba(63, 191, 143, 0.4);
+  background: rgba(63, 191, 143, 0.08);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.nk-status-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nk-green);
+  box-shadow: 0 0 6px var(--nk-green);
+}
+
+.nk-panel-title {
+  font-family: var(--nk-display);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+}
+
+.nk-panel-sub {
+  font-style: italic;
+  color: var(--nk-muted);
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+}
+
+.nk-desc {
+  max-width: 62ch;
+  line-height: 1.7;
+  color: #c7cce0;
+  margin: 0 0 3.5rem;
+  font-size: 1.02rem;
+}
+
+.nk-label {
+  font-family: var(--nk-mono);
+  font-size: 0.75rem;
+  color: var(--nk-muted);
+  letter-spacing: 0.02em;
+  margin: 0 0 1.5rem;
+}
+
+/* ---------- transit-line architecture diagram ---------- */
+
+.nk-architecture {
+  margin-bottom: 4rem;
+}
+
+.nk-line-wrap {
+  position: relative;
+}
+
+.nk-rail {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--nk-line);
+  border-radius: 2px;
+  z-index: 0;
+}
+
+.nk-rail-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  transform-origin: top;
+  background: linear-gradient(180deg, var(--nk-blue), var(--nk-amber));
+  border-radius: 2px;
+}
+
+.nk-rail-dot {
+  position: absolute;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--nk-blue);
+  box-shadow: 0 0 0 4px rgba(79, 142, 247, 0.18), 0 0 14px rgba(79, 142, 247, 0.7);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.nk-stations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.nk-station {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  column-gap: 1rem;
+  align-items: start;
+}
+
+.nk-station-marker {
+  grid-column: 1;
+  justify-self: center;
+  margin-top: 0.3rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--nk-panel);
+  border: 2px solid var(--nk-blue);
+}
+
+.nk-station--end .nk-station-marker {
+  border-color: var(--nk-amber);
+}
+
+.nk-station-body {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--nk-line);
+  padding-bottom: 0.85rem;
+}
+
+.nk-station-label {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.nk-station-tag {
+  font-family: var(--nk-mono);
+  font-size: 0.7rem;
+  color: var(--nk-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ---------- tech chips ---------- */
+
+.nk-stacks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.nk-integrations {
+  margin-bottom: 4rem;
+}
+
+.nk-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.nk-chip {
+  font-family: var(--nk-mono);
+  font-size: 0.8rem;
+  color: var(--nk-text);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--nk-line);
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.nk-chip:hover {
+  border-color: var(--nk-blue);
+  background: rgba(79, 142, 247, 0.07);
+  transform: translateY(-2px);
+}
+
+.nk-chip--planned {
+  border-style: dashed;
+  color: var(--nk-muted);
+}
+.nk-chip--planned:hover {
+  border-color: var(--nk-amber);
+  background: rgba(242, 177, 52, 0.07);
+  color: var(--nk-text);
+}
+
+/* ---------- ecosystem grid (3D tilt cards) ---------- */
+
+.nk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  perspective: 1200px;
+  margin-bottom: 4rem;
+}
+
+.nk-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--nk-line);
+  border-radius: 14px;
+  padding: 1.5rem;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nk-card:hover {
+  border-color: color-mix(in srgb, var(--nk-accent) 60%, var(--nk-line));
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+.nk-card-bar {
+  display: block;
+  width: 2rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--nk-accent);
+  margin-bottom: 1.1rem;
+  transform: translateZ(20px);
+}
+
+.nk-card-title {
+  font-family: var(--nk-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 0 0 0.9rem;
+  transform: translateZ(16px);
+}
+
+.nk-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--nk-muted);
+  transform: translateZ(10px);
+}
+
+/* ---------- closing ---------- */
+
+.nk-close {
+  border-top: 1px solid var(--nk-line);
+  padding-top: 2.5rem;
+}
+
+.nk-close-text {
+  max-width: 60ch;
+  line-height: 1.75;
+  color: #c7cce0;
+  margin: 0 0 1.75rem;
+  font-size: 1.02rem;
+}
+
+.nk-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--nk-mono);
+  font-size: 0.9rem;
+  color: var(--nk-bg);
+  background: var(--nk-amber);
+  border-radius: 999px;
+  padding: 0.65rem 1.2rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nk-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -10px rgba(242, 177, 52, 0.55);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 720px) {
+  .nk-stacks {
+    grid-template-columns: 1fr;
+  }
+  .nk-station-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* ---------- accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-bg-path {
+    animation: none;
+  }
+  .nk-card {
+    transition: none;
+  }
+}
+
+.nk-cta:focus-visible,
+.nk-chip:focus-visible {
+  outline: 2px solid var(--nk-blue);
+  outline-offset: 2px;
+}
