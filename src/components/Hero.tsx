@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   motion,
   useMotionValue,
@@ -8,10 +8,9 @@ import {
 } from 'framer-motion'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 
-const Scene3D = lazy(() => import('./Scene3D'))
-
 export default function Hero() {
   const [time, setTime] = useState('')
+  const [imgError, setImgError] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
 
   const mouseX = useMotionValue(0)
@@ -20,6 +19,9 @@ export default function Hero() {
   const springY = useSpring(mouseY, { stiffness: 80, damping: 20 })
   const orbX = useTransform(springX, [-500, 500], [-16, 16])
   const orbY = useTransform(springY, [-500, 500], [-16, 16])
+  // slightly stronger parallax for the photo card, opposite tilt on X for depth
+  const cardX = useTransform(springX, [-500, 500], [10, -10])
+  const cardY = useTransform(springY, [-500, 500], [-10, 10])
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -180,11 +182,11 @@ export default function Hero() {
               font-medium
             "
           >
-            <RevealLine delay={0.05}>I study</RevealLine>
+            <RevealLine delay={0.05}>Hi, I'm</RevealLine>
 
             <RevealLine delay={0.16}>
               <span className="relative inline-block text-sky">
-                systems.
+                Aasane.
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -203,10 +205,10 @@ export default function Hero() {
               </span>
             </RevealLine>
 
-            <RevealLine delay={0.27}>I build</RevealLine>
+            <RevealLine delay={0.27}>Mathematics &amp;</RevealLine>
 
             <RevealLine delay={0.38}>
-              <em className="italic text-ink-dim">systems.</em>
+              <em className="italic text-ink-dim">Economics Frontier.</em>
             </RevealLine>
           </h1>
 
@@ -216,8 +218,7 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.52 }}
             className="mt-7 max-w-[500px] text-base sm:text-lg text-ink-dim leading-relaxed"
           >
-            Economics & Mathematics student building at the intersection of
-            technology, data, finance, and entrepreneurship.
+            Building at the nexus of technology, data, finance, and entrepreneurship. I turn complex data systems and capital into scalable, real-world ventures, currently engineering what’s next.
           </motion.p>
 
           <motion.div
@@ -281,7 +282,7 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT — floating profile photo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -292,93 +293,127 @@ export default function Hero() {
           }}
           className="relative min-h-[380px] md:min-h-[500px] flex items-center justify-center"
         >
-          {/* Browser frame */}
-          <div
-            className="
-              relative
-              w-full
-              max-w-[480px]
-              rounded-2xl
-              border border-line
-              bg-bg-raised
-              shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]
-              overflow-hidden
-            "
+          {/* Mouse-parallax wrapper */}
+          <motion.div
+            style={{ x: cardX, y: cardY }}
+            className="relative w-full max-w-[380px]"
           >
-            {/* Chrome */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-line bg-bg-inset">
-              <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
-              <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
-              <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
+            {/* Idle floating wrapper */}
+            <motion.div
+              animate={{ y: [0, -16, 0], rotate: [0, 1, 0] }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="relative"
+            >
+              {/* Rotating glow ring behind the photo */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 22,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+                className="
+                  pointer-events-none
+                  absolute -inset-6
+                  rounded-[2.5rem]
+                  opacity-60
+                  blur-2xl
+                  bg-[conic-gradient(from_0deg,var(--color-sky)_0%,transparent_25%,var(--color-gold)_50%,transparent_75%,var(--color-sky)_100%)]
+                "
+              />
 
-              <span className="ml-2 font-mono text-[10px] text-ink-faint">
-                system_01 — active
-              </span>
-            </div>
-
-            {/* Canvas area */}
-            <div className="relative h-[300px] md:h-[360px] bg-bg-inset">
-              <Suspense fallback={<div className="w-full h-full" />}>
-                <Scene3D />
-              </Suspense>
-
+              {/* Photo frame */}
               <div
                 className="
-                  absolute bottom-3 left-1/2 -translate-x-1/2
-                  font-mono text-[9px]
-                  text-ink-faint
-                  whitespace-nowrap
+                  relative
+                  aspect-[4/5]
+                  w-full
+                  rounded-[2rem]
+                  border border-line
+                  bg-bg-raised
+                  shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5)]
+                  overflow-hidden
                 "
               >
-                people × capital × technology 
+                {!imgError ? (
+                  // Replace the src below with your own photo.
+                  // Drop the file in your `public/images/` folder as `aasane-profile.jpg`,
+                  // or point this at wherever you keep it.
+                  <img
+                    src="/image/Aasane.png"
+                    alt="Aasane Kariuki"
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  // Fallback shown until a real photo is added
+                  <div className="w-full h-full flex items-center justify-center bg-bg-inset">
+                    <span className="font-serif text-6xl text-ink-faint">
+                      AK
+                    </span>
+                  </div>
+                )}
+
+                {/* Subtle bottom gradient so any caption/badge stays readable */}
+                <div
+                  className="
+                    pointer-events-none
+                    absolute inset-x-0 bottom-0 h-24
+                    bg-gradient-to-t from-black/40 to-transparent
+                  "
+                />
               </div>
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Overlapping stat card */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="
-              absolute
-              -bottom-6 left-6
-              md:-bottom-8 md:left-8
-              w-[220px]
-              rounded-xl
-              border border-line
-              bg-bg-raised
-              shadow-[0_20px_40px_-16px_rgba(0,0,0,0.5)]
-              p-4
-            "
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky/10">
-                <span className="w-2 h-2 rounded-full bg-sky" />
-              </span>
+            {/* Overlapping stat card */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.6 }}
+              className="
+                absolute
+                -bottom-6 left-6
+                md:-bottom-8 md:left-8
+                w-[220px]
+                rounded-xl
+                border border-line
+                bg-bg-raised
+                shadow-[0_20px_40px_-16px_rgba(0,0,0,0.5)]
+                p-4
+              "
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky/10">
+                  <span className="w-2 h-2 rounded-full bg-sky" />
+                </span>
 
-              <span className="text-sm font-medium text-white">
-                One builder, many systems
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <div>
-                <div className="font-mono text-[9px] tracking-wide text-ink-faint">
-                  Projects
-                </div>
-                <div className="text-sm text-white font-medium">live</div>
+                <span className="text-sm font-medium text-white">
+                  One builder, many systems
+                </span>
               </div>
 
-              <div>
-                <div className="font-mono text-[9px] tracking-wide text-ink-faint">
-                  Stack
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div>
+                  <div className="font-mono text-[9px] tracking-wide text-ink-faint">
+                    Projects
+                  </div>
+                  <div className="text-sm text-white font-medium">live</div>
                 </div>
-                <div className="text-sm text-white font-medium">
-                  4 connected
+
+                <div>
+                  <div className="font-mono text-[9px] tracking-wide text-ink-faint">
+                    Stack
+                  </div>
+                  <div className="text-sm text-white font-medium">
+                    4 connected
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </div>
