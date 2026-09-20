@@ -3,12 +3,10 @@ import {
   GraduationCap,
   Code2,
   LineChart,
-  ArrowUpRight,
   ArrowUp,
   Activity,
   Layers3,
   BarChart3,
-  Telescope,
 } from 'lucide-react'
 
 import TiltCard from './TiltCard'

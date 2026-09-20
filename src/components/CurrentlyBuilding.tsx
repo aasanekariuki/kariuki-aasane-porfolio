@@ -5,7 +5,6 @@ import {
   ChartNoAxesCombined,
   Code2,
   Compass,
-  Layers3,
   Sigma,
   Sparkles,
 } from 'lucide-react'
